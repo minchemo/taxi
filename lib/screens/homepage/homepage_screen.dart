@@ -197,6 +197,7 @@ class HomepageScreen extends GetView<HomepageController> {
                     if (controller.isLoadingStartOrder.value) {
                       return null;
                     } else if (controller.status != 2) {
+                      _locationController.resetPolyline();
                       controller.isLoadingStartOrder.value = true;
                       await controller.startBilling();
 
@@ -206,11 +207,13 @@ class HomepageScreen extends GetView<HomepageController> {
                       });
 
                       // controller.calPriceTimer5s();
+
                     } else {
                       controller.isLoadingStartOrder.value = true;
                       await controller.fixedPointBilling();
                       controller.stopHalfway();
                       await controller.calPrice();
+
                       Future<void> future = Get.bottomSheet(
                         Container(
                             padding: EdgeInsets.fromLTRB(10, 10, 10, 20),

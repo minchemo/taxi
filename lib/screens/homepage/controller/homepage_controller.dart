@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_storage/get_storage.dart';
@@ -103,12 +104,27 @@ class HomepageController extends GetxController {
 
     // storageBox.remove("executingOrder");
     await _locationController.setCurrentLocation();
+
     setCurrentStatus();
+    _locationController.loadBillingRoute();
+
     _connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
       print('Current connectivity status: $result');
       _connectivityResult = result;
+    });
+
+    StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
+            desiredAccuracy: LocationAccuracy.bestForNavigation,
+            distanceFilter: 3)
+        .listen((Position? position) {
+      //開始計費
+      if (_status.value == 2) {
+        _locationController.addBillingRoutePolyline(position!);
+      }
+
+      _locationController.setCurrentLocation();
     });
 
     super.onInit();
@@ -304,8 +320,14 @@ class HomepageController extends GetxController {
           secondPosition, desPosition, "stop" + (list.length - 1).toString());
     }
 
-    double distance = await _orderRepository.getGoogleMapDistance(
-        firstPosition, secondPosition);
+    // double distance = await _orderRepository.getGoogleMapDistance(
+    //     firstPosition, secondPosition);
+
+    double distance = _locationController
+        .calculatePolylineDistane(_locationController.polylineCoordinates);
+
+    print('距離');
+    print(distance);
 
     double totalDistance = 0.0;
 
@@ -315,7 +337,8 @@ class HomepageController extends GetxController {
     } else {
       totalDistance = storageBox.read("totalDistance");
       print(totalDistance);
-      totalDistance = totalDistance + distance;
+      // totalDistance = totalDistance + distance;
+      totalDistance = distance;
       print(totalDistance);
     }
 
@@ -412,8 +435,10 @@ class HomepageController extends GetxController {
         _locationController.setMapCamera(
             _locationController.currentLocation, startPosition);
 
-        _locationController.addMarker(
-            startPosition, "start", BitmapDescriptor.defaultMarkerWithHue(20));
+        var icon = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(24, 24)), 'assets/position.png');
+
+        _locationController.addMarker(startPosition, "start", icon);
       }
 
       _locationController.getPolyline(startPosition, desPosition, "start");
@@ -579,6 +604,7 @@ class HomepageController extends GetxController {
       }
     }
 
+    _locationController.clearBillingRoute();
     storageBox.remove("executingOrder");
     Get.back();
 

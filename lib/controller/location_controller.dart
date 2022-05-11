@@ -43,6 +43,8 @@ class LocationController extends GetxController {
   Completer<GoogleMapController> gmapController = Completer();
   bool _isGooglmeMapCompleter = false;
 
+  final GetStorage storageBox = GetStorage();
+
   @override
   Future<void> onInit() async {
     print("location");
@@ -257,6 +259,51 @@ class LocationController extends GetxController {
     }
   }
 
+  void resetPolyline() async {
+    polylineCoordinates.value = [];
+  }
+
+  void addBillingRoutePolyline(Position point) async {
+    print("****** setBillingRoutePolyline *****");
+    polylineCoordinates.remove(LatLng(0.0, 0.0));
+    polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+
+    addColorPolyLine(polylineCoordinates, 1, Colors.greenAccent);
+
+    storageBox.write('billingRoute', polylineCoordinates);
+  }
+
+  void loadBillingRoute() async {
+    final route = storageBox.read('billingRoute');
+
+    if (route != null) {
+      List routes = new List.from(route);
+
+      routes.forEach((element) {
+        LatLng point = LatLng(element[0], element[1]);
+        polylineCoordinates.add(point);
+      });
+
+      addColorPolyLine(polylineCoordinates, 1, Colors.greenAccent);
+    }
+  }
+
+  void clearBillingRoute() async {
+    resetPolyline();
+    storageBox.remove('billingRoute');
+  }
+
+  addColorPolyLine(List<LatLng> polylineCoordinates, ployID, color) {
+    PolylineId id = PolylineId("poly" + ployID.toString());
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: color,
+      points: polylineCoordinates,
+      width: 8,
+    );
+    _polylines[id] = polyline;
+  }
+
   addPolyLine(List<LatLng> polylineCoordinates, ployID) {
     PolylineId id = PolylineId("poly" + ployID.toString());
     Polyline polyline = Polyline(
@@ -278,7 +325,10 @@ class LocationController extends GetxController {
 
     await _goToTheLake();
 
-    addMarker(currentLocation, "init", BitmapDescriptor.defaultMarker);
+    var icon = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(8, 8)), 'assets/car.png');
+
+    addMarker(currentLocation, "init", icon);
   }
 
   void setLocationSec() async {
@@ -305,8 +355,12 @@ class LocationController extends GetxController {
       // print(lngBefore);
       // position = await getCurrentLocation();
       _currentLocation.value = LatLng(position.latitude, position.longitude);
-      addMarker(currentLocation, "init", BitmapDescriptor.defaultMarker);
-      _goToTheLake();
+
+      var icon = await BitmapDescriptor.fromAssetImage(
+          ImageConfiguration(size: Size(24, 24)), 'assets/car.png');
+
+      addMarker(currentLocation, "init", icon);
+      // _goToTheLake();
       // var tempDistance = getDistance(
       //     latBefore, lngBefore, position.latitude, position.longitude);
       // print("== tempDistance ==");
@@ -406,5 +460,35 @@ class LocationController extends GetxController {
       gmapController.complete(controller);
       // _isGooglmeMapCompleter = true;
     }
+  }
+
+  double calculatePolylineDistane(List<LatLng> polyline) {
+    double totalDistance = 0;
+    for (int i = 0; i < polyline.length; i++) {
+      if (i < polyline.length - 1) {
+        // skip the last index
+        totalDistance += getStraightLineDistance(
+            polyline[i + 1].latitude,
+            polyline[i + 1].longitude,
+            polyline[i].latitude,
+            polyline[i].longitude);
+      }
+    }
+    return totalDistance;
+  }
+
+  double getStraightLineDistance(lat1, lon1, lat2, lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(lat2 - lat1);
+    var dLon = deg2rad(lon2 - lon1);
+    var a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon / 2) * sin(dLon / 2);
+    var c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    var d = R * c; // Distance in km
+    return d; //in m
+  }
+
+  dynamic deg2rad(deg) {
+    return deg * (pi / 180);
   }
 }
