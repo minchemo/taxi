@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "661690981940",
+    "firebase_url": "https://taxi-57ca7-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "taxi-57ca7",
+    "storage_bucket": "taxi-57ca7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661690981940:android:aaae9a3187f86679a37461",
+        "android_client_info": {
+          "package_name": "com.nsg.taxi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "661690981940-ta2f7g2jnnhdd2eeeasolu24c2l38chj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAS6ccBjVyyWHnWLHJ43xXmcjGNG0drXXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661690981940-ta2f7g2jnnhdd2eeeasolu24c2l38chj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "661690981940-n35qsi6jij5fovmnr11qfomvj8i5u8a8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nsg.taxi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
