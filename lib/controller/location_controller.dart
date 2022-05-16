@@ -37,6 +37,7 @@ class LocationController extends GetxController {
   final _polylines = RxMap<PolylineId, Polyline>();
   Map<PolylineId, Polyline> get polylines => _polylines;
   RxList<LatLng> polylineCoordinates = [LatLng(0.0, 0.0)].obs;
+  RxList<LatLng> billingCoordinates = [LatLng(0.0, 0.0)].obs;
 
   late Position position;
   late LatLng lastMapPosition;
@@ -263,14 +264,35 @@ class LocationController extends GetxController {
     polylineCoordinates.value = [];
   }
 
+  RxInt outOfRange = 0.obs;
+
   void addBillingRoutePolyline(Position point) async {
     print("****** setBillingRoutePolyline *****");
-    polylineCoordinates.remove(LatLng(0.0, 0.0));
-    polylineCoordinates.add(LatLng(point.latitude, point.longitude));
 
-    addColorPolyLine(polylineCoordinates, 1, Colors.greenAccent);
+    var lastPost;
 
-    storageBox.write('billingRoute', polylineCoordinates);
+    if (billingCoordinates.length == 0) {
+      lastPost = await getCurrentLocation();
+    } else {
+      lastPost = billingCoordinates[billingCoordinates.length - 1];
+    }
+
+    double distanceLimit = getDistance(
+        lastPost.latitude, lastPost.longitude, point.latitude, point.longitude);
+
+    if (outOfRange.value == 0) {
+      billingCoordinates.remove(LatLng(0.0, 0.0));
+      billingCoordinates.add(LatLng(point.latitude, point.longitude));
+
+      addColorPolyLine(billingCoordinates, 1, Colors.greenAccent);
+
+      storageBox.write('billingRoute', billingCoordinates);
+    }
+
+    if (distanceLimit >= 100 && outOfRange.value == 0) {
+      outOfRange.value = 1;
+      Future.delayed(const Duration(seconds: 7), () => outOfRange.value = 0);
+    }
   }
 
   void loadBillingRoute() async {
@@ -281,15 +303,16 @@ class LocationController extends GetxController {
 
       routes.forEach((element) {
         LatLng point = LatLng(element[0], element[1]);
-        polylineCoordinates.add(point);
+        billingCoordinates.add(point);
       });
 
-      addColorPolyLine(polylineCoordinates, 1, Colors.greenAccent);
+      addColorPolyLine(billingCoordinates, 1, Colors.greenAccent);
     }
   }
 
   void clearBillingRoute() async {
     resetPolyline();
+    billingCoordinates.value = [];
     storageBox.remove('billingRoute');
   }
 
@@ -448,7 +471,8 @@ class LocationController extends GetxController {
     // continue accessing the position of the device.
 
     return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation);
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
+    );
   }
 
   void onCameraMove(CameraPosition position) {

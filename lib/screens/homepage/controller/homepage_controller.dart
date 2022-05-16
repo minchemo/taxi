@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
+
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -117,8 +118,9 @@ class HomepageController extends GetxController {
 
     StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
             desiredAccuracy: LocationAccuracy.bestForNavigation,
-            distanceFilter: 3)
+            distanceFilter: 1)
         .listen((Position? position) {
+      print(position);
       //開始計費
       if (_status.value == 2) {
         _locationController.addBillingRoutePolyline(position!);
@@ -324,7 +326,7 @@ class HomepageController extends GetxController {
     //     firstPosition, secondPosition);
 
     double distance = _locationController
-        .calculatePolylineDistane(_locationController.polylineCoordinates);
+        .calculatePolylineDistane(_locationController.billingCoordinates);
 
     print('距離');
     print(distance);
