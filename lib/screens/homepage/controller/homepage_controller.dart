@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math';
+import 'package:background_location/background_location.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -107,7 +108,9 @@ class HomepageController extends GetxController {
     await _locationController.setCurrentLocation();
 
     setCurrentStatus();
-    _locationController.loadBillingRoute();
+    if (_status.value == 2) {
+      _locationController.loadBillingRoute();
+    }
 
     _connectivitySubscription = Connectivity()
         .onConnectivityChanged
@@ -116,14 +119,32 @@ class HomepageController extends GetxController {
       _connectivityResult = result;
     });
 
-    StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
-            desiredAccuracy: LocationAccuracy.bestForNavigation,
-            distanceFilter: 1)
-        .listen((Position? position) {
-      print(position);
+    // StreamSubscription<Position> positionStream = Geolocator.getPositionStream(
+    //         desiredAccuracy: LocationAccuracy.bestForNavigation,
+    //         distanceFilter: 1)
+    //     .listen((Position? position) {
+    //   print(position);
+    //   //開始計費
+    //   if (_status.value == 2) {
+    //     _locationController.addBillingRoutePolyline(position!);
+    //   }
+
+    //   _locationController.setCurrentLocation();
+    // });
+
+    //設置背景通知
+    // BackgroundLocation.setAndroidNotification(
+    //   title: "Taxi 程式執行中",
+    //   message: "定位已啟動...",
+    //   icon: "@mipmap/ic_launcher",
+    // );
+    BackgroundLocation.setAndroidConfiguration(500);
+    BackgroundLocation.startLocationService(distanceFilter: 5);
+    BackgroundLocation.getLocationUpdates((location) {
+      print(location);
       //開始計費
       if (_status.value == 2) {
-        _locationController.addBillingRoutePolyline(position!);
+        _locationController.addBillingRoutePolyline(location);
       }
 
       _locationController.setCurrentLocation();
@@ -214,6 +235,9 @@ class HomepageController extends GetxController {
     stream.listen((DatabaseEvent event) async {
       final data = jsonEncode(event.snapshot.value);
       final res = jsonDecode(data);
+
+      print('進行中訂單');
+      print(storageBox.read("executingOrder"));
 
       if (res["order"] != null) {
         if (res["order"]["now"] != null &&

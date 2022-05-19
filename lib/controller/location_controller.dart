@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:background_location/background_location.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -266,7 +267,7 @@ class LocationController extends GetxController {
 
   RxInt outOfRange = 0.obs;
 
-  void addBillingRoutePolyline(Position point) async {
+  void addBillingRoutePolyline(Location point) async {
     print("****** setBillingRoutePolyline *****");
 
     var lastPost;
@@ -277,12 +278,12 @@ class LocationController extends GetxController {
       lastPost = billingCoordinates[billingCoordinates.length - 1];
     }
 
-    double distanceLimit = getDistance(
-        lastPost.latitude, lastPost.longitude, point.latitude, point.longitude);
+    double distanceLimit = getDistance(lastPost.latitude, lastPost.longitude,
+        point.latitude!, point.longitude!);
 
     if (outOfRange.value == 0) {
       billingCoordinates.remove(LatLng(0.0, 0.0));
-      billingCoordinates.add(LatLng(point.latitude, point.longitude));
+      billingCoordinates.add(LatLng(point.latitude!, point.longitude!));
 
       addColorPolyLine(billingCoordinates, 1, Colors.greenAccent);
 

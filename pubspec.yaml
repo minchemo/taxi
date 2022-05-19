@@ -65,6 +65,7 @@ dependencies:
   geolocator_apple: ^1.2.2
   geolocator_android: ^2.1.0
   background_location: ^0.8.1
+  adaptive_dialog: ^1.6.3
  
   
   
