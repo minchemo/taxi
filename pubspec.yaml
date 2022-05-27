@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -35,7 +35,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
@@ -50,7 +49,7 @@ dependencies:
   cloud_firestore: ^2.4.0
   connectivity_plus: ^2.2.0
   flutter_polyline_points: ^1.0.0
-  
+
   google_maps_flutter: ^2.1.1
   geolocator: ^7.4.0
   signature: ^5.0.0
@@ -64,11 +63,13 @@ dependencies:
       ref: master
   geolocator_apple: ^1.2.2
   geolocator_android: ^2.1.0
-  background_location: ^0.8.1
+  background_location:
+    git:
+      url: https://github.com/hilalbaig/background_location.git
+      ref: master
   adaptive_dialog: ^1.6.3
- 
-  
-  
+  assets_audio_player: ^3.0.4+3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -85,7 +86,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -96,7 +96,6 @@ flutter:
     - assets/
     - .env.development
     - .env.production
- 
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

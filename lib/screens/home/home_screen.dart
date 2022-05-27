@@ -35,13 +35,17 @@ class HomeScreen extends GetView<HomeController> {
   Widget build(BuildContext context) {
     _homepageController.isNowOrder.listen((val) {
       if (val) {
+        _homepageController.playNotification();
         _homepageController.show(context);
       }
     });
 
     _homepageController.isBookingOrder.listen((val) {
       if (val) {
-        _homepageController.showBookingOrder(context);
+        if (!_homepageController.waitingAcceptBookingOrder.value) {
+          _homepageController.playNotification();
+          _homepageController.showBookingOrder(context);
+        }
       }
     });
 

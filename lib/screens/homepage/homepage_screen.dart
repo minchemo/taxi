@@ -128,6 +128,15 @@ class HomepageScreen extends GetView<HomepageController> {
             ],
           ),
           SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Obx(() => Text(
+                  "目前里程: ${_locationController.calculatePolylineDistane(_locationController.billingCoordinates).toStringAsFixed(1)} km",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)))
+            ],
+          ),
+          SizedBox(height: 10),
           Text("${controller.nowOrder["description"]}",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
           Row(

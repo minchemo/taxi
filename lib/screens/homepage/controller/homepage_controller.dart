@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:background_location/background_location.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:get_storage/get_storage.dart';
@@ -36,6 +38,7 @@ class HomepageController extends GetxController {
   String orderDate = "";
   String nowOrderID = "";
   final RxBool isBookingOrder = true.obs;
+  final RxBool waitingAcceptBookingOrder = false.obs;
 
   final RxBool _receivingOrder = false.obs;
   bool get receivingOrder => _receivingOrder.value;
@@ -538,6 +541,7 @@ class HomepageController extends GetxController {
   }
 
   void finishOrder(payType) async {
+    EasyLoading.show();
     _receivingOrder.value = false;
     _isLoadingFinishOrder.value = true;
 
@@ -632,6 +636,7 @@ class HomepageController extends GetxController {
 
     _locationController.clearBillingRoute();
     storageBox.remove("executingOrder");
+    EasyLoading.dismiss();
     Get.back();
 
     initStatus();
@@ -705,6 +710,7 @@ class HomepageController extends GetxController {
     //   Get.back();
     // });
 
+    waitingAcceptBookingOrder.value = true;
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -737,6 +743,7 @@ class HomepageController extends GetxController {
                             alignment: Alignment.centerRight,
                             child: GestureDetector(
                                 onTap: () {
+                                  waitingAcceptBookingOrder.value = false;
                                   closeNowOrder();
                                 },
                                 child: Icon(Icons.close))),
@@ -801,9 +808,12 @@ class HomepageController extends GetxController {
                             child: ElevatedButton(
                                 onPressed: () async {
                                   if (!isLoadingSetNowOrder) {
+                                    EasyLoading.show();
                                     await setNowOrderStatus(nowOrder["id"]);
                                     isNowOrder.value = false;
+                                    EasyLoading.dismiss();
                                     Get.back();
+                                    waitingAcceptBookingOrder.value = false;
                                   }
                                 },
                                 style: ButtonStyle(
@@ -820,6 +830,7 @@ class HomepageController extends GetxController {
         }).then((exit) {
       if (exit == null) {
         if (!isLoadingSetNowOrder) {
+          waitingAcceptBookingOrder.value = false;
           isNowOrder.value = false;
         }
         // closeNowOrder();
@@ -828,6 +839,7 @@ class HomepageController extends GetxController {
   }
 
   void showBookingOrder(BuildContext context) {
+    waitingAcceptBookingOrder.value = true;
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -861,6 +873,7 @@ class HomepageController extends GetxController {
                             child: GestureDetector(
                                 onTap: () {
                                   closeBookingOrder();
+                                  waitingAcceptBookingOrder.value = false;
                                 },
                                 child: Icon(Icons.close))),
                         Row(
@@ -924,6 +937,7 @@ class HomepageController extends GetxController {
                             child: ElevatedButton(
                                 onPressed: () async {
                                   if (!isLoadingSetBookingOrder) {
+                                    EasyLoading.show();
                                     _isLoadingSetBookingOrder.value = true;
                                     await setBookingOrder(bookingOrder["id"]);
                                     final BookingController _bookingController =
@@ -933,7 +947,9 @@ class HomepageController extends GetxController {
                                     // _receivingOrder.value = true;
                                     isBookingOrder.value = false;
                                     _isLoadingSetBookingOrder.value = false;
+                                    EasyLoading.dismiss();
                                     Get.back();
+                                    waitingAcceptBookingOrder.value = false;
                                   }
                                 },
                                 style: ButtonStyle(
@@ -947,6 +963,7 @@ class HomepageController extends GetxController {
                       ])));
         }).then((exit) {
       if (exit == null) {
+        waitingAcceptBookingOrder.value = false;
         isBookingOrder.value = false;
         closeBookingOrder();
       }
@@ -1030,5 +1047,19 @@ class HomepageController extends GetxController {
     if (res != null) return true;
 
     return false;
+  }
+
+  playNotification() async {
+    print(1);
+    final assetsAudioPlayer = AssetsAudioPlayer();
+
+    try {
+      await assetsAudioPlayer.open(
+        Audio("assets/alert.wav"),
+      );
+      assetsAudioPlayer.play();
+    } catch (t) {
+      print(t);
+    }
   }
 }
