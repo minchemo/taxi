@@ -674,10 +674,10 @@ class HomepageController extends GetxController {
     if (storageBox.read("totalDistance") != null) {
       _totalDistance.value = storageBox.read("totalDistance");
 
-      if (totalDistance <= 3) {
+      if (totalDistance <= 2) {
         tempTotalDistance = 0.0;
       } else {
-        tempTotalDistance = _totalDistance.value - 3;
+        tempTotalDistance = _totalDistance.value - 2;
       }
 
       print(totalDistance);
@@ -701,6 +701,12 @@ class HomepageController extends GetxController {
       resMap = await getPrice();
 
       _totalPrice.value = (nowOrder["price"]);
+    }
+
+    final testPrice = _totalPrice.value % 5;
+
+    if (testPrice > 0) {
+      _totalPrice.value += 5 - testPrice;
     }
   }
 
