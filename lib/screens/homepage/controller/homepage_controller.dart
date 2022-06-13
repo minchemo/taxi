@@ -345,8 +345,8 @@ class HomepageController extends GetxController {
       LatLng desPosition = LatLng(
           double.parse(nowOrder["endLat"]), double.parse(nowOrder["endLnt"]));
 
-      _locationController.getStopPolyline(
-          secondPosition, desPosition, "stop" + (list.length - 1).toString());
+      // _locationController.getStopPolyline(
+      //     secondPosition, desPosition, "stop" + (list.length - 1).toString());
     }
 
     // double distance = await _orderRepository.getGoogleMapDistance(
@@ -417,7 +417,7 @@ class HomepageController extends GetxController {
       print("目的地$desPosition");
       _locationController.setMapCamera(
           _locationController.currentLocation, desPosition);
-      _locationController.getPolyline(startPosition, desPosition, "billing");
+      // _locationController.getPolyline(startPosition, desPosition, "billing");
     }
   }
 
@@ -470,7 +470,7 @@ class HomepageController extends GetxController {
         _locationController.addMarker(startPosition, "start", icon);
       }
 
-      _locationController.getPolyline(startPosition, desPosition, "start");
+      // _locationController.getPolyline(startPosition, desPosition, "start");
 
       String? apiUrl =
           dotenv.env['APP_SERVER_URL'].toString() + '/dispatchOrder';
