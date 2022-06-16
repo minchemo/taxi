@@ -143,7 +143,7 @@ class HomepageController extends GetxController {
     // );
     BackgroundLocation.setAndroidConfiguration(500);
     BackgroundLocation.startLocationService(distanceFilter: 5);
-    BackgroundLocation.getLocationUpdates((location) {
+    BackgroundLocation.getLocationUpdates((Location location) {
       print(location);
       //開始計費
       if (_status.value == 2) {
@@ -451,6 +451,30 @@ class HomepageController extends GetxController {
       _isLoadingSetNowOrder.value = true;
       storageBox.write("executingOrder", orderID);
 
+      // if (nowOrder["startLocation"] != '' && nowOrder["startLat"] == "") {
+      //   List<geo.Location> startLocations = await geo.locationFromAddress(
+      //       nowOrder["startLocation"],
+      //       localeIdentifier: 'zh');
+
+      //   geo.Location loc = startLocations[0];
+      //   _nowOrder.value["startLat"] = loc.latitude.toStringAsFixed(7);
+      //   _nowOrder.value["startLnt"] = loc.longitude.toStringAsFixed(7);
+      // }
+
+      // if (nowOrder["endLocation"] != '' && nowOrder["endLat"] == "") {
+      //   List<geo.Location> endLocations = await geo.locationFromAddress(
+      //       nowOrder["endLocation"],
+      //       localeIdentifier: 'zh');
+
+      //   geo.Location loc = endLocations[0];
+      //   _nowOrder.value["endLat"] = loc.latitude.toStringAsFixed(7);
+      //   _nowOrder.value["endLnt"] = loc.longitude.toStringAsFixed(7);
+      // }
+      // _nowOrder.refresh();
+
+      // await _orderRepository.updateOrder(orderID, nowOrder["startLat"],
+      //     nowOrder["startLnt"], nowOrder["endLat"], nowOrder["endLnt"]);
+
       LatLng startPosition = LatLng(double.parse(nowOrder["startLat"]),
           double.parse(nowOrder["startLnt"]));
       LatLng desPosition = LatLng(0, 0);
@@ -494,6 +518,13 @@ class HomepageController extends GetxController {
 
       print(res);
     }
+  }
+
+  resetDriverStatus() async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref("driver/" + id);
+    ref.update({
+      'status': status,
+    });
   }
 
   void initStatus() async {

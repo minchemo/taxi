@@ -1,4 +1,5 @@
 import 'package:app_settings/app_settings.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -65,6 +66,8 @@ class SettingScreen extends GetView<SettingController> {
                   if (ok == OkCancelResult.ok &&
                       homepageController.status != 2) {
                     box.remove('executingOrder');
+
+                    await homepageController.resetDriverStatus();
 
                     EasyLoading.showSuccess('重置完成，請取消派遣並重新派遣');
                   } else if (homepageController.status == 2) {

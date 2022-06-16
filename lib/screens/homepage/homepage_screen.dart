@@ -9,6 +9,7 @@ import 'package:taxi/repositories/online_record_repository.dart';
 import 'package:taxi/screens/homepage/controller/booking_controller.dart';
 import 'package:taxi/controller/online_record_controller.dart';
 import 'package:taxi/screens/homepage/electronic_signature_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'controller/homepage_controller.dart';
 import 'finish_order_screen.dart';
 
@@ -110,9 +111,16 @@ class HomepageScreen extends GetView<HomepageController> {
           //     onPressed: () => Get.toNamed(ElectronicSignatureScreen.routeName),
           //     child: Text("Add Data")),
           Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text("上車地點:${controller.nowOrder["startLocation"]}",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+              TextButton(
+                  onPressed: () => {
+                        launch(
+                            'http://maps.google.com/maps?saddr=${_locationController.currentLocation.latitude.toString()},${_locationController.currentLocation.longitude.toString()}&daddr=${controller.nowOrder["startLat"]},${controller.nowOrder["startLnt"]}&mode=driving')
+                      },
+                  child: Text('導航'))
             ],
           ),
           SizedBox(height: 10),

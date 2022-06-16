@@ -51,6 +51,7 @@ class HomeScreen extends GetView<HomeController> {
 
     _homepageController.isCancelOrder.listen((val) {
       if (val) {
+        _homepageController.resetDriverStatus();
         controller.alert(context, "派遣取消通知", "派遣已被取消!");
       }
     });

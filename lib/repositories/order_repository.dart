@@ -20,6 +20,23 @@ class OrderRepository {
     return res.data["data"];
   }
 
+  Future<Response<dynamic>> updateOrder(String id, String startLat,
+      String startLnt, String endLat, String endLnt) async {
+    print("====== updateOrder =======");
+    String? apiUrl = dotenv.env['APP_SERVER_URL'].toString() + '/updateOrder';
+
+    final json = {
+      "id": id,
+      "startLat": startLat,
+      "startLnt": startLnt,
+      "endLat": endLat,
+      "endLnt": endLnt
+    };
+    print(json);
+
+    return dio.post(apiUrl, data: json);
+  }
+
   Future<Response<dynamic>> patchOrder(
       String driverId, int payType, int price, String userPhone) async {
     print("====== patchOrder =======");
