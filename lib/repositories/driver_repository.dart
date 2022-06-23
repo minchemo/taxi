@@ -11,6 +11,7 @@ class DriverRepository {
     var json = {"id": id};
     print(json);
     print("getOneDriverById");
+
     final res = await dio.post(apiUrl, data: json).catchError((error) {
       print(error);
     });
@@ -22,7 +23,7 @@ class DriverRepository {
 
   Future<String> updateDriver(user, newPW) async {
     print("updateDriver");
-    
+
     String? apiUrl = dotenv.env['APP_SERVER_URL'].toString() + '/updateDriver';
     var json = {
       "id": user["id"],

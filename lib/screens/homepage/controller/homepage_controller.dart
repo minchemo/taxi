@@ -333,17 +333,21 @@ class HomepageController extends GetxController {
 
     print(list);
 
+    if (list == null) {
+      return;
+    }
+
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
 
-    LatLng firstPosition =
-        LatLng(list[list.length - 1]["lat"]!, list[list.length - 1]["lnt"]!);
+    // LatLng firstPosition =
+    //     LatLng(list[list.length - 1]["lat"]!, list[list.length - 1]["lnt"]!);
 
     LatLng secondPosition = LatLng(position.latitude, position.longitude);
 
     if (nowOrder["endLat"] != "" && nowOrder["endLnt"] != "") {
-      LatLng desPosition = LatLng(
-          double.parse(nowOrder["endLat"]), double.parse(nowOrder["endLnt"]));
+      // LatLng desPosition = LatLng(
+      //     double.parse(nowOrder["endLat"]), double.parse(nowOrder["endLnt"]));
 
       // _locationController.getStopPolyline(
       //     secondPosition, desPosition, "stop" + (list.length - 1).toString());
@@ -451,30 +455,6 @@ class HomepageController extends GetxController {
       _isLoadingSetNowOrder.value = true;
       storageBox.write("executingOrder", orderID);
 
-      // if (nowOrder["startLocation"] != '' && nowOrder["startLat"] == "") {
-      //   List<geo.Location> startLocations = await geo.locationFromAddress(
-      //       nowOrder["startLocation"],
-      //       localeIdentifier: 'zh');
-
-      //   geo.Location loc = startLocations[0];
-      //   _nowOrder.value["startLat"] = loc.latitude.toStringAsFixed(7);
-      //   _nowOrder.value["startLnt"] = loc.longitude.toStringAsFixed(7);
-      // }
-
-      // if (nowOrder["endLocation"] != '' && nowOrder["endLat"] == "") {
-      //   List<geo.Location> endLocations = await geo.locationFromAddress(
-      //       nowOrder["endLocation"],
-      //       localeIdentifier: 'zh');
-
-      //   geo.Location loc = endLocations[0];
-      //   _nowOrder.value["endLat"] = loc.latitude.toStringAsFixed(7);
-      //   _nowOrder.value["endLnt"] = loc.longitude.toStringAsFixed(7);
-      // }
-      // _nowOrder.refresh();
-
-      // await _orderRepository.updateOrder(orderID, nowOrder["startLat"],
-      //     nowOrder["startLnt"], nowOrder["endLat"], nowOrder["endLnt"]);
-
       LatLng startPosition = LatLng(double.parse(nowOrder["startLat"]),
           double.parse(nowOrder["startLnt"]));
       LatLng desPosition = LatLng(0, 0);
@@ -521,6 +501,13 @@ class HomepageController extends GetxController {
   }
 
   resetDriverStatus() async {
+    GetStorage box = GetStorage();
+    box.remove('executingOrder');
+
+    if (_status.value == 2) {
+      _status.value = 1;
+    }
+
     DatabaseReference ref = FirebaseDatabase.instance.ref("driver/" + id);
     ref.update({
       'status': status,
@@ -546,8 +533,10 @@ class HomepageController extends GetxController {
 
     List pointsList = storageBox.read("points");
 
-    for (int i = 0; i < pointsList.length; i++) {
-      _locationController.removeMarker("stop" + i.toString());
+    if (pointsList != null) {
+      for (int i = 0; i < pointsList.length; i++) {
+        _locationController.removeMarker("stop" + i.toString());
+      }
     }
 
     storageBox.remove("points");
@@ -752,118 +741,105 @@ class HomepageController extends GetxController {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              child: Container(
-                  height: 450,
-                  padding:
-                      EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 10),
-                  margin: EdgeInsets.only(top: 10),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(40),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            offset: Offset(0, 10),
-                            blurRadius: 10),
-                      ]),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          return Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              color: Colors.white,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                            onTap: () {
+                              waitingAcceptBookingOrder.value = false;
+                              closeNowOrder();
+                            },
+                            child: Icon(Icons.close))),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Align(
-                            alignment: Alignment.centerRight,
-                            child: GestureDetector(
-                                onTap: () {
-                                  waitingAcceptBookingOrder.value = false;
-                                  closeNowOrder();
-                                },
-                                child: Icon(Icons.close))),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                child: Text("派遣通知",
+                        Expanded(
+                            child: Text("派遣通知",
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w600,
+                                ))),
+                        Text("VIP")
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                            child: Text(orderDate,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                ))),
+                        nowOrder["price"] != 0
+                            ? Text("\$ ${nowOrder["price"]}")
+                            : Text("")
+                      ],
+                    ),
+                    Text("${nowOrder["userName"]}"),
+                    SizedBox(height: 10),
+                    Text("上車:",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        )),
+                    Text("${nowOrder["startLocation"]}",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        )),
+                    SizedBox(height: 10),
+                    Text("目的地:",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        )),
+                    Text("${nowOrder["endLocation"]}",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        )),
+                    SizedBox(height: 10),
+                    Text("${nowOrder["description"]}",
+                        style: TextStyle(
+                          fontSize: 16,
+                        )),
+                    SizedBox(height: 10),
+                    SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                            onPressed: () async {
+                              if (!isLoadingSetNowOrder) {
+                                EasyLoading.show();
+                                await setNowOrderStatus(nowOrder["id"]);
+                                isNowOrder.value = false;
+                                EasyLoading.dismiss();
+                                Get.back();
+                                waitingAcceptBookingOrder.value = false;
+                              }
+                            },
+                            style: ButtonStyle(
+                                fixedSize: (MaterialStateProperty.all(
+                                    Size(double.infinity, 80))),
+                                backgroundColor: MaterialStateProperty.all(
+                                    Colors.yellow[800])),
+                            child: !isLoadingSetNowOrder
+                                ? Text("接單",
                                     style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600,
-                                    ))),
-                            Text("VIP")
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                child: Text(orderDate,
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600,
-                                    ))),
-                            nowOrder["price"] != 0
-                                ? Text("\$ ${nowOrder["price"]}")
-                                : Text("")
-                          ],
-                        ),
-                        Text("${nowOrder["userName"]}"),
-                        SizedBox(height: 10),
-                        Text("上車:",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            )),
-                        Text("${nowOrder["startLocation"]}",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            )),
-                        SizedBox(height: 10),
-                        Text("目的地:",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            )),
-                        Text("${nowOrder["endLocation"]}",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            )),
-                        SizedBox(height: 10),
-                        Text("${nowOrder["description"]}",
-                            style: TextStyle(
-                              fontSize: 16,
-                            )),
-                        SizedBox(height: 10),
-                        SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                                onPressed: () async {
-                                  if (!isLoadingSetNowOrder) {
-                                    EasyLoading.show();
-                                    await setNowOrderStatus(nowOrder["id"]);
-                                    isNowOrder.value = false;
-                                    EasyLoading.dismiss();
-                                    Get.back();
-                                    waitingAcceptBookingOrder.value = false;
-                                  }
-                                },
-                                style: ButtonStyle(
-                                    fixedSize: (MaterialStateProperty.all(
-                                        Size(double.infinity, 80))),
-                                    backgroundColor: MaterialStateProperty.all(
-                                        Colors.yellow[800])),
-                                child: !isLoadingSetNowOrder
-                                    ? Text("接單",
-                                        style: TextStyle(
-                                            color: Colors.black, fontSize: 18))
-                                    : CircularProgressIndicator()))
-                      ])));
+                                        color: Colors.black, fontSize: 18))
+                                : CircularProgressIndicator()))
+                  ]),
+            ),
+          );
         }).then((exit) {
       if (exit == null) {
         if (!isLoadingSetNowOrder) {

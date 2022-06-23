@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:taxi/screens/home/widgets/bottom_navbar.dart';
 import 'package:taxi/screens/homepage/booking_screen.dart';
 import 'package:taxi/screens/homepage/controller/booking_controller.dart';
@@ -35,16 +36,16 @@ class HomeScreen extends GetView<HomeController> {
   Widget build(BuildContext context) {
     _homepageController.isNowOrder.listen((val) {
       if (val) {
-        _homepageController.playNotification();
         _homepageController.show(context);
+        _homepageController.playNotification();
       }
     });
 
     _homepageController.isBookingOrder.listen((val) {
       if (val) {
         if (!_homepageController.waitingAcceptBookingOrder.value) {
-          _homepageController.playNotification();
           _homepageController.showBookingOrder(context);
+          _homepageController.playNotification();
         }
       }
     });
